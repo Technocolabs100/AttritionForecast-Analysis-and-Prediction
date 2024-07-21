@@ -3,6 +3,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.preprocessing import LabelEncoder, StandardScaler
+from sklearn.model_selection import train_test_split
 import numpy as np
 
 # Loading the dataset
@@ -100,4 +101,26 @@ data_set['Experience_Level'] = data_set['TotalWorkingYears'] / (data_set['Age'] 
 
 # Save the preprocessed data
 data_set.to_csv('preprocessed_data.csv', index=False)
-print("helo")
+
+#--------------------------------DATA SPLITTING----------------------------
+
+
+# Load the preprocessed data
+data_path = 'preprocessed_data.csv'
+data = pd.read_csv(data_path)
+
+# Display the first few rows of the dataset
+print(data.head())
+
+# Separate features and target variable
+X = data.drop(columns=['Attrition'])
+y = data['Attrition']
+
+# Perform train-test split
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)
+
+# Display the shape of the resulting datasets
+print(X_train.shape, X_test.shape, y_train.shape, y_test.shape)
+
+
+
