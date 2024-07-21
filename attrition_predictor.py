@@ -5,6 +5,14 @@ import seaborn as sns
 from sklearn.preprocessing import LabelEncoder, StandardScaler
 from sklearn.model_selection import train_test_split
 import numpy as np
+from sklearn.linear_model import LogisticRegression
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
+from sklearn.svm import SVC
+from sklearn.neural_network import MLPClassifier
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score
+from sklearn.model_selection import GridSearchCV
+import joblib
 
 # Loading the dataset
 data_set = pd.read_csv('Attrition Dataset/WA_Fn-UseC_-HR-Employee-Attrition.csv')
@@ -116,11 +124,129 @@ print(data.head())
 X = data.drop(columns=['Attrition'])
 y = data['Attrition']
 
-# Perform train-test split
+# Identify remaining categorical features
+categorical_features = X.select_dtypes(include=['object', 'bool']).columns
+
+# Apply one-hot encoding
+X = pd.get_dummies(X, columns=categorical_features, drop_first=True)
+
+# Perform train-test split again with the updated data
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)
 
 # Display the shape of the resulting datasets
 print(X_train.shape, X_test.shape, y_train.shape, y_test.shape)
 
+#----------------------------------------------MODEL BUILDING and training and evaluation and hyperparameter tuning-------------------------
+# Function to evaluate models
+def evaluate_model(model, X_test, y_test):
+    y_pred = model.predict(X_test)
+    accuracy = accuracy_score(y_test, y_pred)
+    precision = precision_score(y_test, y_pred)
+    recall = recall_score(y_test, y_pred)
+    f1 = f1_score(y_test, y_pred)
+    roc_auc = roc_auc_score(y_test, model.predict_proba(X_test)[:, 1])
+    return accuracy, precision, recall, f1, roc_auc
 
 
+# Initialize models
+models = {
+    'Logistic Regression': LogisticRegression(max_iter=5000),
+    'Decision Tree': DecisionTreeClassifier(),
+    'Random Forest': RandomForestClassifier(),
+    'Gradient Boosting': GradientBoostingClassifier(),
+    'SVM': SVC(probability=True),
+    'Neural Network': MLPClassifier(max_iter=5000)
+}
+
+# Define hyperparameter grids for each model
+param_grids = {
+    'Logistic Regression': {
+        'C': [0.1, 1, 10],
+        'solver': ['liblinear']
+    },
+    'Decision Tree': {
+        'max_depth': [None, 10, 20, 30],
+        'min_samples_split': [2, 5, 10]
+    },
+    'Random Forest': {
+        'n_estimators': [100, 200, 300],
+        'max_depth': [None, 10, 20, 30],
+        'min_samples_split': [2, 5, 10]
+    },
+    'Gradient Boosting': {
+        'n_estimators': [100, 200, 300],
+        'learning_rate': [0.01, 0.1, 0.2],
+        'max_depth': [3, 5, 7]
+    },
+    'SVM': {
+        'C': [0.1, 1, 10],
+        'kernel': ['linear', 'rbf']
+    },
+    'Neural Network': {
+        'hidden_layer_sizes': [(50,), (100,), (50, 50)],
+        'activation': ['tanh', 'relu'],
+        'solver': ['adam'],
+        'alpha': [0.0001, 0.001]
+    }
+}
+
+# Perform hyperparameter tuning and evaluation for each model
+best_models = {}
+evaluation_results = {}
+
+# Train each model
+trained_models = {}
+for name, model in models.items():
+    model.fit(X_train, y_train)
+    trained_models[name] = model
+
+#print(trained_models)
+
+# Evaluate all trained models
+evaluation_results = {}
+for name, model in trained_models.items():
+    evaluation_results[name] = evaluate_model(model, X_test, y_test)
+print("     ")
+print(evaluation_results)
+
+for name, model in models.items():
+    print(f"Tuning hyperparameters for {name}...")
+    grid_search = GridSearchCV(model, param_grids[name], cv=5, scoring='accuracy')
+    grid_search.fit(X_train, y_train)
+    
+    best_model = grid_search.best_estimator_
+    best_models[name] = best_model
+    evaluation_results[name] = evaluate_model(best_model, X_test, y_test)
+
+# Display evaluation results for tuned models
+print("Evaluation Results for Tuned Models:")
+for name, metrics in evaluation_results.items():
+    print(f"{name}: Accuracy={metrics[0]:.4f}, Precision={metrics[1]:.4f}, Recall={metrics[2]:.4f}, F1-Score={metrics[3]:.4f}, ROC-AUC={metrics[4]:.4f}")
+
+# Convert evaluation results to a DataFrame for better comparison
+results_df = pd.DataFrame(evaluation_results, index=['Accuracy', 'Precision', 'Recall', 'F1-Score', 'ROC-AUC']).T
+
+# Calculate the average score across all metrics
+results_df['Average Score'] = results_df.mean(axis=1)
+
+# Print the DataFrame with average scores
+print("\nComparison of Model Performance:")
+print(results_df)
+
+# Declare the best model based on the highest average score
+best_model_name = results_df['Average Score'].idxmax()
+best_model = best_models[best_model_name]
+
+print(f"\nBest Model: {best_model_name}")
+print(f"Performance: \n{results_df.loc[best_model_name]}")
+
+#--------------------------------------MODEL DEPLOYMENT-------------
+# Save the best model
+model_path = str(best_model_name)+'.pkl'
+joblib.dump(best_model, model_path)
+
+# Load the model for future use
+loaded_model = joblib.load(model_path)
+
+# Make predictions
+predictions = loaded_model.predict(X_test)
