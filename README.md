@@ -57,7 +57,7 @@ Worklife balance, Work Culture also plays a role in attrition_rate. Significant 
 
 There could be multiple reasons for high attrition rates, especially low monthly income, less hike in salary, motive to have better growth, Worklife balance, job satisfaction level etc.
 Through dashboard its clear that attrition rate is increasing because of following parameters:-
-⦁	Employee with bachelor's degree and above are not interested in Sales Job. Job satisfaction level is very low in these Roles.
-⦁	Unmarried employees are more likely to leave company if they are not satisfied with work culture and worklife balance.
-⦁	HR employees are leaving with company for better salary and work culture.
-⦁	Employees having office 12km are more likely to switch the company.
+		⦁	Employee with bachelor's degree and above are not interested in Sales Job. Job satisfaction level is very low in these Roles.
+		⦁	Unmarried employees are more likely to leave company if they are not satisfied with work culture and worklife balance.
+		⦁	HR employees are leaving with company for better salary and work culture.
+		⦁	Employees having office 12km are more likely to switch the company.
