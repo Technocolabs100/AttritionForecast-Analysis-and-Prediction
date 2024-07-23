@@ -13,20 +13,20 @@ Columns like "StandardHours", "Over18" is removed as it contains non-filterable 
 
 # Data Manipulation:-
 
-⦁	"target_att"column is created which contains binary boolean value of target column "Attrition"
-			formula - target_att = IF('hrdata'[Attrition]="Yes",1,0)
-⦁	"age_range" column is created to make "Age" column into a categorical one.
-		formula - age_range = SWITCH (TRUE(),
-                           hrdata[Age]>10 && hrdata[Age] <=30, "<30",
-                           hrdata[Age]>30 && hrdata[Age] <=40, "30-40",
-                           hrdata[Age]>40 && hrdata[Age] <=50,"40-50",
-                           hrdata[Age]>50,"above 50")
-⦁	"income_slab" column is created to make "MonthlyIncome' column into a categorical one.
-		formula - income_slab = SWITCH (TRUE(),
-                              hrdata[MonthlyIncome]>0 && hrdata[MonthlyIncome]<5000, "0-5000",
-                              hrdata[MonthlyIncome]>=5000 && hrdata[MonthlyIncome]<10000, "5000-10000",
-                              hrdata[MonthlyIncome]>=10000 && hrdata[MonthlyIncome]<15000, "10000-15000",
-                              hrdata[MonthlyIncome]>=15000 && hrdata[MonthlyIncome]<20000, "15000-20000")
+		⦁	"target_att"column is created which contains binary boolean value of target column "Attrition"
+					formula - target_att = IF('hrdata'[Attrition]="Yes",1,0)
+		⦁	"age_range" column is created to make "Age" column into a categorical one.
+				formula - age_range = SWITCH (TRUE(),
+		                           hrdata[Age]>10 && hrdata[Age] <=30, "<30",
+		                           hrdata[Age]>30 && hrdata[Age] <=40, "30-40",
+		                           hrdata[Age]>40 && hrdata[Age] <=50,"40-50",
+		                           hrdata[Age]>50,"above 50")
+		⦁	"income_slab" column is created to make "MonthlyIncome' column into a categorical one.
+				formula - income_slab = SWITCH (TRUE(),
+		                              hrdata[MonthlyIncome]>0 && hrdata[MonthlyIncome]<5000, "0-5000",
+		                              hrdata[MonthlyIncome]>=5000 && hrdata[MonthlyIncome]<10000, "5000-10000",
+		                              hrdata[MonthlyIncome]>=10000 && hrdata[MonthlyIncome]<15000, "10000-15000",
+		                              hrdata[MonthlyIncome]>=15000 && hrdata[MonthlyIncome]<20000, "15000-20000")
                               
 # Measures created:-
                
