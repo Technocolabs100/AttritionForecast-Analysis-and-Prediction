@@ -1,100 +1,63 @@
-# AttritionForecast-Analysis-and-Prediction
+#  Employee Attrition Analysis and Prediction
 
-Welcome to the Acme AttritionForecast: Analysis and Prediction repository! This project focuses on analyzing employee attrition and building predictive models to forecast future attrition rates. By understanding the factors influencing employee turnover, we aim to provide actionable insights to improve employee retention strategies.
+This report aims to provide insights into the attrition rates within the organization and to identify potential causes of attrition using data from the Power BI dashboard. The analysis focuses on understanding patterns, trends, and correlations related to employee turnover, which is crucial for HR to formulate strategies aimed at retention and organizational stability.
 
+# Steps Involved : - 
 
-## Project Overview
+# Data Cleaning:- 
+The downloaded data contains 35 columns with columns. 
+Firstly columns "DailyRate", "HourlyRate", "MonthlyRate" were removed as these columns were not contributing in dasboard creation.
+The quality of data is checked to check the null and duplicate values in the table.
+Data Types of columns were also checked 
+Columns like "StandardHours", "Over18" is removed as it contains non-filterable data(only consist one value)
 
-Employee attrition is a significant concern for many organizations as it impacts productivity, morale, and costs. This project aims to analyze historical employee data to identify key factors influencing attrition and to build predictive models that can help forecast future attrition rates.
+# Data Manipulation:-
 
-## Dataset
+⦁	"target_att"column is created which contains binary boolean value of target column "Attrition"
+			formula - target_att = IF('hrdata'[Attrition]="Yes",1,0)
+⦁	"age_range" column is created to make "Age" column into a categorical one.
+		formula - age_range = 
+                           SWITCH (TRUE(),
+                           hrdata[Age]>10 && hrdata[Age] <=30, "<30",
+                           hrdata[Age]>30 && hrdata[Age] <=40, "30-40",
+                           hrdata[Age]>40 && hrdata[Age] <=50,"40-50",
+                           hrdata[Age]>50,"above 50")
+⦁	"income_slab" column is created to make "MonthlyIncome' column into a categorical one.
+		formula - income_slab = 
+                              SWITCH (TRUE(),
+                              hrdata[MonthlyIncome]>0 && hrdata[MonthlyIncome]<5000, "0-5000",
+                              hrdata[MonthlyIncome]>=5000 && hrdata[MonthlyIncome]<10000, "5000-10000",
+                              hrdata[MonthlyIncome]>=10000 && hrdata[MonthlyIncome]<15000, "10000-15000",
+                              hrdata[MonthlyIncome]>=15000 && hrdata[MonthlyIncome]<20000, "15000-20000")
+                              
+# Measures created:-
+               
+               ⦁	Active employess:- 
+               	m_active_emp = count(hrdata[EmployeeNumber]) - sum(hrdata[target_att])
+               ⦁	Attrition Rate:- 
+               		m_attrition_rate = DIVIDE(SUM('hrdata'[target_att]),COUNT('hrdata'[EmployeeNumber]),"")
 
-The dataset used in this project includes various features such as employee demographics, job roles, compensation, performance, and other relevant attributes. It provides a comprehensive view of the factors that may contribute to employee turnover. This project aims to provide insights into the factors influencing employee attrition and predict which employees are likely to leave the company. Let's refine the project to make it more closely aligned with real-time scenarios and address live problem statements within an organization.
+# FINDINGS:-
 
+Almost every required details can be filtered with the below dashboard.
+ ![dasboard](https://github.com/user-attachments/assets/867dcb34-77ef-4689-900c-d7142d8391e4)
 
-#### Business Intelligence (BI) Analysis:
-1. **Data Exploration and Visualization:**
-   - Create interactive dashboards using BI tools to visualize trends and patterns in employee turnover.
-   - Identify departments, roles, and specific projects with the highest turnover rates.
+From the above dashboard, it's clear that, with increase in salary(monthly income), the attrition rate decreases.
+The R&D sector department has more no. of attritions followed by Sales and Human Resource.
+Employee with lowest job satisfaction and working in Sales role and Human Resource has highest attrition rate of 58.33% and 50% respectively.
+Male Employees have higher attrition rates than Female Employees
+Single Males with frequent business travel have high attrition rate, which signifies that people are moving from Sales Job.
+Employees with a doctorate education background have the lowest attrition rate.
+Single Employees with bachelor's degree having Sales job role are most likely to leave company in 2-3 years as shown in below fig.
+ ![bachelor_sales](https://github.com/user-attachments/assets/3a577410-94b0-43cd-be49-358a1ac7dbf3)
 
-2. **Descriptive Analytics:**
-   - Generate reports that highlight the primary reasons for attrition based on employee feedback, exit interviews, and other relevant sources.
-   - Analyze the impact of factors like job satisfaction, workload, and career growth on employee turnover.
+Worklife balance, Work Culture also plays a role in attrition_rate. Significant increase in attrition rate are observed with decrease in Worklife balance and Work culture.
 
-3. **Predictive Analytics with BI:**
-   - Build predictive models within the BI tools to estimate the likelihood of turnover for current employees.
-   - Implement scenario analysis to understand the potential impact of changes in satisfaction levels, compensation, or management practices.
+# Cause of Attrition
 
-#### Machine Learning Model:
-1. **Data Preprocessing:**
-   - Incorporate real-time data feeds from HR systems to ensure the model is continuously updated.
-   - Dynamically handle new employee entries and update the model as employees leave or join.
-
-2. **Feature Engineering:**
-   - Include features such as recent performance reviews, project completion milestones, and employee engagement scores for a more accurate prediction.
-
-3. **Model Training and Monitoring:**
-   - Implement a mechanism to retrain the machine learning model periodically with the latest data.
-   - Set up monitoring to alert HR teams when an employee's predicted turnover likelihood surpasses a certain threshold.
-
-4. **Integration with BI Tools:**
-   - Embed live predictions from the machine learning model into the BI dashboards.
-   - Enable HR managers to drill down into specific departments or teams to identify high-risk individuals and take proactive measures.
-
-#### Real-time Scenarios and Impact:
-1. **Proactive Employee Retention:**
-   - HR managers can use the integrated BI tools to identify high-risk employees and take proactive measures to address their concerns.
-   - Real-time alerts enable timely interventions, such as personalized career development plans or targeted retention efforts.
-
-2. **Strategic Workforce Planning:**
-   - HR leaders can leverage predictive analytics to inform strategic workforce planning, ensuring that teams critical to ongoing projects are adequately supported.
-
-3. **Continuous Improvement:**
-   - Regular updates to the machine learning model based on real-time data allow for continuous improvement in prediction accuracy.
-   - Feedback loops from HR teams can be integrated into the model to enhance its effectiveness over time.
-
-By addressing the live problem statement of employee turnover at Acme Corporation, this project integrates BI tools and machine learning to provide actionable insights and empower the organization to proactively manage its workforce. The real-time nature of the analysis ensures that decision-makers have up-to-date information for effective interventions.
-
-
-## Installation
-
-To set up the project environment, follow these steps:
-
-1. Clone the repository:
-   ```sh
-   git clone https://github.com/Technocolabs100/AttritionForecast-Analysis-and-Prediction.git
-   ```
-
-2. Navigate to the project directory:
-   ```sh
-   cd AttritionForecast-Analysis-and-Prediction
-   ```
-
-3. Create and activate a virtual environment (optional but recommended):
-   ```sh
-   python3 -m venv venv
-   source venv/bin/activate  # On Windows, use `venv\Scripts\activate`
-   ```
-
-4. Install the required dependencies:
-   ```sh
-   pip install -r requirements.txt
-   ```
-
-## Results
-
-The results of the analysis and predictions, including key insights, model performance metrics, and visualizations, will be stored in the `results/` directory.
-
-## Contributing
-
-We welcome contributions to enhance this project. If you have suggestions, bug reports, or improvements, please create an issue or submit a pull request.
-
-## License
-
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for more details.
-
-## Acknowledgements
-
-We would like to thank the contributors and the community for their support and valuable feedback to technocollabs@gmail.com.
-
----
+There could be multiple reasons for high attrition rates, especially low monthly income, less hike in salary, motive to have better growth, Worklife balance, job satisfaction level etc.
+Through dashboard its clear that attrition rate is increasing because of following parameters:-
+⦁	Employee with bachelor's degree and above are not interested in Sales Job. Job satisfaction level is very low in these Roles.
+⦁	Unmarried employees are more likely to leave company if they are not satisfied with work culture and worklife balance.
+⦁	HR employees are leaving with company for better salary and work culture.
+⦁	Employees having office 12km are more likely to switch the company.
