@@ -10,7 +10,7 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
 from sklearn.svm import SVC
 from sklearn.neural_network import MLPClassifier
-from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score,confusion_matrix
 from sklearn.model_selection import GridSearchCV
 import joblib
 
@@ -133,6 +133,13 @@ X = pd.get_dummies(X, columns=categorical_features, drop_first=True)
 # Perform train-test split again with the updated data
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)
 
+# Save the train and test sets as CSV files
+train_data = pd.concat([X_train, y_train], axis=1)
+test_data = pd.concat([X_test, y_test], axis=1)
+
+train_data.to_csv('train_data.csv', index=False)
+test_data.to_csv('test_data.csv', index=False)
+
 # Display the shape of the resulting datasets
 print(X_train.shape, X_test.shape, y_train.shape, y_test.shape)
 
@@ -145,8 +152,8 @@ def evaluate_model(model, X_test, y_test):
     recall = recall_score(y_test, y_pred)
     f1 = f1_score(y_test, y_pred)
     roc_auc = roc_auc_score(y_test, model.predict_proba(X_test)[:, 1])
-    return accuracy, precision, recall, f1, roc_auc
-
+    conf_matrix = confusion_matrix(y_test, y_pred, labels=[1, 0])
+    return accuracy, precision, recall, f1, roc_auc, conf_matrix
 
 # Initialize models
 models = {
@@ -154,7 +161,6 @@ models = {
     'Decision Tree': DecisionTreeClassifier(),
     'Random Forest': RandomForestClassifier(),
     'Gradient Boosting': GradientBoostingClassifier(),
-    'SVM': SVC(probability=True),
     'Neural Network': MLPClassifier(max_iter=5000)
 }
 
@@ -178,10 +184,6 @@ param_grids = {
         'learning_rate': [0.01, 0.1, 0.2],
         'max_depth': [3, 5, 7]
     },
-    'SVM': {
-        'C': [0.1, 1, 10],
-        'kernel': ['linear', 'rbf']
-    },
     'Neural Network': {
         'hidden_layer_sizes': [(50,), (100,), (50, 50)],
         'activation': ['tanh', 'relu'],
@@ -190,24 +192,44 @@ param_grids = {
     }
 }
 
+# Perform initial model training and evaluation
+trained_models = {}
+evaluation_results = {}
+confusion_matrices = {}
+
+for name, model in models.items():
+    print(f"Training {name}...")
+    model.fit(X_train, y_train)
+    trained_models[name] = model
+    accuracy, precision, recall, f1, roc_auc, conf_matrix = evaluate_model(model, X_test, y_test)
+    evaluation_results[name] = [accuracy, precision, recall, f1, roc_auc]
+    confusion_matrices[name] = conf_matrix
+
+# Save evaluation results to a CSV file
+results = []
+for name, metrics in evaluation_results.items():
+    accuracy, precision, recall, f1, roc_auc = metrics
+    results.append({
+        "Model": name,
+        "Accuracy": accuracy,
+        "Precision": precision,
+        "Recall": recall,
+        "F1 Score": f1,
+        "ROC AUC": roc_auc
+    })
+results_df = pd.DataFrame(results)
+results_df.to_csv('initial_model_evaluation_results.csv', index=False)
+
+# Save correct and incorrect predictions
+for model_name, model in trained_models.items():
+    test_data[f'{model_name}_Pred'] = model.predict(X_test)
+    test_data[f'{model_name}_Correct'] = test_data['Attrition'] == test_data[f'{model_name}_Pred']
+test_data.to_csv('initial_test_data_with_predictions.csv', index=False)
+
 # Perform hyperparameter tuning and evaluation for each model
 best_models = {}
 evaluation_results = {}
-
-# Train each model
-trained_models = {}
-for name, model in models.items():
-    model.fit(X_train, y_train)
-    trained_models[name] = model
-
-#print(trained_models)
-
-# Evaluate all trained models
-evaluation_results = {}
-for name, model in trained_models.items():
-    evaluation_results[name] = evaluate_model(model, X_test, y_test)
-print("     ")
-print(evaluation_results)
+confusion_matrices = {}
 
 for name, model in models.items():
     print(f"Tuning hyperparameters for {name}...")
@@ -216,12 +238,15 @@ for name, model in models.items():
     
     best_model = grid_search.best_estimator_
     best_models[name] = best_model
-    evaluation_results[name] = evaluate_model(best_model, X_test, y_test)
+    accuracy, precision, recall, f1, roc_auc, conf_matrix = evaluate_model(best_model, X_test, y_test)
+    evaluation_results[name] = [accuracy, precision, recall, f1, roc_auc]
+    confusion_matrices[name] = conf_matrix
 
 # Display evaluation results for tuned models
 print("Evaluation Results for Tuned Models:")
 for name, metrics in evaluation_results.items():
-    print(f"{name}: Accuracy={metrics[0]:.4f}, Precision={metrics[1]:.4f}, Recall={metrics[2]:.4f}, F1-Score={metrics[3]:.4f}, ROC-AUC={metrics[4]:.4f}")
+    accuracy, precision, recall, f1, roc_auc = metrics
+    print(f"{name}: Accuracy={accuracy:.4f}, Precision={precision:.4f}, Recall={recall:.4f}, F1-Score={f1:.4f}, ROC-AUC={roc_auc:.4f}")
 
 # Convert evaluation results to a DataFrame for better comparison
 results_df = pd.DataFrame(evaluation_results, index=['Accuracy', 'Precision', 'Recall', 'F1-Score', 'ROC-AUC']).T
@@ -240,9 +265,12 @@ best_model = best_models[best_model_name]
 print(f"\nBest Model: {best_model_name}")
 print(f"Performance: \n{results_df.loc[best_model_name]}")
 
-#--------------------------------------MODEL DEPLOYMENT-------------
+# Save the confusion matrices
+conf_matrix_path = 'confusion_matrices.joblib'
+joblib.dump(confusion_matrices, conf_matrix_path)
+
 # Save the best model
-model_path = str(best_model_name)+'.pkl'
+model_path = 'best_model.joblib'
 joblib.dump(best_model, model_path)
 
 # Load the model for future use
@@ -250,3 +278,9 @@ loaded_model = joblib.load(model_path)
 
 # Make predictions
 predictions = loaded_model.predict(X_test)
+print(predictions)
+
+# Load and print the confusion matrices
+loaded_confusion_matrices = joblib.load(conf_matrix_path)
+for model_name, conf_matrix in loaded_confusion_matrices.items():
+    print(f"\nConfusion Matrix for {model_name}:\n{conf_matrix}")
