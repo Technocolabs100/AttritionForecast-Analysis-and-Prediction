@@ -1,0 +1,105 @@
+### Project Report: Employee Attrition Analysis and Prediction
+
+#### 1. Introduction
+- **Project Title:** Employee Attrition Analysis and Prediction
+- **Author:** MALAMA DAVID CHALI
+- **Date:** 27 - JULY - 2024
+
+#### 2. Objectives
+- Analyze the employee attrition dataset to understand key factors contributing to employee attrition.
+- Develop and evaluate predictive models to forecast employee attrition.
+- Identify the best-performing model for deployment.
+
+#### 3. Data Description
+- **Dataset:** IBM HR Analytics Employee Attrition & Performance dataset.
+- **Key Features:**
+  - **Numerical Features:** Age, DailyRate, DistanceFromHome, HourlyRate, MonthlyIncome, TotalWorkingYears, etc.
+  - **Categorical Features:** BusinessTravel, Department, EducationField, JobRole, MaritalStatus, OverTime, etc.
+- **Target Variable:** Attrition (Yes/No)
+
+#### 4. Data Preprocessing
+- **Handling Missing Values:**
+  - Filled missing values in numerical features with the mean.
+- **Encoding Categorical Variables:**
+  - Label Encoding for binary categorical variables.
+  - One-Hot Encoding for multi-class categorical variables.
+- **Feature Scaling:**
+  - Standardized numerical features using StandardScaler.
+- **Feature Engineering:**
+  - Created new features: Age_Income (Age * MonthlyIncome), Experience_Level (TotalWorkingYears / (Age - 18)).
+- **Data Splitting:**
+  - Split the data into training (80%) and testing (20%) sets.
+
+#### 5. Exploratory Data Analysis (EDA)
+- **Visualizations:**
+  - Histograms for numerical features.
+  - Box plots for numerical features.
+  - Bar charts for categorical features.
+  - Heatmap for correlation analysis.
+- **Attrition Analysis:**
+  - Compared distributions of key features between employees who stayed and those who left.
+
+#### 6. Model Building
+- **Models Initialized:**
+  - Logistic Regression
+  - Decision Tree
+  - Random Forest
+  - Gradient Boosting
+  - Neural Network
+- **Hyperparameter Tuning:**
+  - Performed GridSearchCV for hyperparameter tuning of each model.
+
+#### 7. Model Evaluation
+- **Metrics Used:**
+  - Accuracy
+  - Precision
+  - Recall
+  - F1 Score
+  - ROC AUC Score
+  - Confusion Matrix
+
+#### 8. Results
+- **Initial Model Evaluation:**
+  - Trained models on the training set and evaluated on the testing set.
+  - Saved evaluation results to `initial_model_evaluation_results.csv`.
+  - Saved predictions to `initial_test_data_with_predictions.csv`.
+- **Hyperparameter Tuning and Final Model Evaluation:**
+  - Tuned hyperparameters and evaluated models again.
+  - Saved evaluation results to a DataFrame for comparison.
+  - Identified the best model based on the highest average score.
+
+**Comparison of Model Performance:**
+
+
+| Model              | Accuracy | Precision | Recall   | F1-Score | ROC-AUC | Average Score |
+|--------------------|----------|-----------|----------|----------|---------|---------------|
+| Logistic Regression| 0.863946 | 0.640000  | 0.340426 | 0.444444 | 0.804634| 0.618690      |
+| Decision Tree      | 0.799320 | 0.357143  | 0.319149 | 0.337079 | 0.688776| 0.500293      |
+| Random Forest      | 0.833333 | 0.428571  | 0.127660 | 0.196721 | 0.797571| 0.476771      |
+| Gradient Boosting  | 0.843537 | 0.529412  | 0.191489 | 0.281250 | 0.801275| 0.529393      |
+| Neural Network     | 0.867347 | 0.625000  | 0.425532 | 0.506329 | 0.774830| 0.639808      |
+
+
+**Best Model: Neural Network
+Performance:
+Accuracy         0.867347
+Precision        0.625000
+Recall           0.425532
+F1-Score         0.506329
+ROC-AUC          0.774830
+Average Score    0.639808-
+
+**Confusion Matrices:**
+- Saved to `confusion_matrices.joblib`.
+
+#### 9. Conclusion
+- Successfully analyzed and visualized key factors influencing employee attrition.
+- Developed and evaluated multiple predictive models.
+- Identified Gradient Boosting as the best-performing model.
+- Prepared the model for deployment and saved necessary artifacts for future use.
+
+#### 10. Future Work
+- Further fine-tune the models with additional hyperparameter tuning.
+- Explore ensemble methods to combine predictions from multiple models.
+- Deploy the best model to a production environment and monitor its performance over time.
+
